@@ -20,7 +20,7 @@ TEMP_DIR = os.path.join(DATA_DIR, "temp")
 RESULT_DIR = os.path.join(DATA_DIR, "results")
 
 WHISPER_MODEL = "openai/whisper-large-v3-turbo"
-SUMMARY_MODEL_PRIMARY = "deepseek-r1:32b"
+SUMMARY_MODEL_PRIMARY = "deepseek-r1:14b"
 SUMMARY_MODEL_FALLBACK = "llama3:8b"  
 
 MAX_INPUT_TOKENS = 4000  

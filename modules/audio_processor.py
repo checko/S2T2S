@@ -15,11 +15,11 @@ class AudioProcessor:
             
             audio = AudioSegment.from_file(input_file)
             audio.export(output_wav_file, format="wav")
-            logger.info(f"Dosya dönüştürüldü: {output_wav_file}")
+            logger.info(f"File converted: {output_wav_file}")
             
             return output_wav_file
         except Exception as e:
-            logger.error(f"Ses dönüştürme hatası: {e}")
+            logger.error(f"Audio conversion error: {e}")
             raise
 
     @staticmethod
@@ -34,10 +34,10 @@ class AudioProcessor:
                 segment.export(segment_path, format="wav")
                 segment_files.append((segment_path, idx))
             
-            logger.info(f"Ses dosyası {len(segments)} parçaya bölündü")
+            logger.info(f"Audio file split into {len(segments)} segments")
             return segment_files
         except Exception as e:
-            logger.error(f"Ses bölme hatası: {e}")
+            logger.error(f"Audio splitting error: {e}")
             raise
 
     @staticmethod
@@ -47,4 +47,4 @@ class AudioProcessor:
                 if os.path.exists(file):
                     os.remove(file)
             except Exception as e:
-                logger.warning(f"{file} silinirken hata: {e}")
+                logger.warning(f"Error deleting {file}: {e}")

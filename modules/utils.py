@@ -23,18 +23,18 @@ def setup_logging():
     logging.getLogger("torch").setLevel(logging.ERROR)
 
 def get_timestamp() -> str:
-    """Dosya isimlendirmesi için zaman damgası oluşturur."""
+    """Creates a timestamp for file naming."""
     return datetime.now().strftime("%H_%M_%d_%m_%Y")
 
 def save_results(transcription: str, summary: str, file_base_name: str = None) -> Tuple[str, str]:
     """
     Args:
-        transcription: Kaydedilecek transkripsiyon metni
-        summary: Kaydedilecek özet metni
-        file_base_name: Orijinal dosya adı (opsiyonel)
+        transcription: Transcription text to be saved
+        summary: Summary text to be saved
+        file_base_name: Original file name (optional)
         
     Returns:
-        Kaydedilen dosya yolları (transkripsiyon, özet)
+        Saved file paths (transcription, summary)
     """
     timestamp = get_timestamp()
     
@@ -53,8 +53,8 @@ def save_results(transcription: str, summary: str, file_base_name: str = None) -
     with open(summary_file, "w", encoding="utf-8") as f:
         f.write(summary)
     
-    logger.info(f"Transkripsiyon kaydedildi: {transcription_file}")
-    logger.info(f"Özet kaydedildi: {summary_file}")
+    logger.info(f"Transcription saved: {transcription_file}")
+    logger.info(f"Summary saved: {summary_file}")
     
     return transcription_file, summary_file
 
@@ -65,9 +65,9 @@ def kill_stalled_processes(process_name="ollama"):
             os.system(f'taskkill /f /im {process_name}.exe')
         else:
             os.system(f'pkill -f {process_name}')
-        logger.info(f"Olası askıda kalmış {process_name} süreçleri temizlendi")
+        logger.info(f"Possible stalled {process_name} processes cleaned")
     except Exception as e:
-        logger.warning(f"Süreç temizleme başarısız: {e}")
+        logger.warning(f"Process cleanup failed: {e}")
 
 def ensure_ollama_running():
     try:
@@ -80,11 +80,11 @@ def ensure_ollama_running():
         )
         
         if result.returncode != 0:
-            logger.warning("Ollama servisi çalışmıyor olabilir!")
+            logger.warning("Ollama service may not be running!")
             return False
         return True
     except Exception as e:
-        logger.error(f"Ollama durum kontrolü başarısız: {e}")
+        logger.error(f"Ollama status check failed: {e}")
         return False
 
 def monitor_process_with_timeout(func, args=None, kwargs=None, timeout=180):
@@ -129,7 +129,7 @@ def monitor_process_with_timeout(func, args=None, kwargs=None, timeout=180):
             "status": "timeout",
             "elapsed": timeout,
             "result": None,
-            "exception": TimeoutError(f"İşlem {timeout} saniye içinde tamamlanmadı")
+            "exception": TimeoutError(f"Process did not complete within {timeout} seconds")
         }
     
     if exception[0]:
@@ -149,4 +149,4 @@ def monitor_process_with_timeout(func, args=None, kwargs=None, timeout=180):
 
 def clean_memory():
     gc.collect()
-    logger.info("Bellek temizlendi")
+    logger.info("Memory cleaned")

@@ -10,19 +10,19 @@ logger = logging.getLogger(__name__)
 class Transcriber:
     def __init__(self):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        logger.info(f"Cihaz: {self.device}")
+        logger.info(f"Device: {self.device}")
         
         if self.device == "cuda":
             torch.backends.cudnn.benchmark = True
             logger.info(f"GPU: {torch.cuda.get_device_name(0)}")
-            logger.info(f"Toplam GPU belleği: {torch.cuda.get_device_properties(0).total_memory / 1024**3:.2f} GB")
+            logger.info(f"Total GPU memory: {torch.cuda.get_device_properties(0).total_memory / 1024**3:.2f} GB")
             
         self.model = None
         
     def load_model(self) -> None:
-        """Whisper modelini yükler."""
+        """Loads the Whisper model."""
         try:
-            logger.info(f"Whisper modeli yükleniyor: {WHISPER_MODEL}")
+            logger.info(f"Loading Whisper model: {WHISPER_MODEL}")
             self.model = pipeline(
                 "automatic-speech-recognition", 
                 model=WHISPER_MODEL, 
@@ -30,18 +30,18 @@ class Transcriber:
                 torch_dtype=torch.float16
             )
         except Exception as e:
-            logger.error(f"Model yükleme hatası: {e}")
+            logger.error(f"Model loading error: {e}")
             raise
             
     def transcribe_segments(self, segment_files: List[Tuple[str, int]]) -> str:
-        """Ses segmentlerini transkribe eder ve birleştirir."""
+        """Transcribes audio segments and combines them."""
         if not self.model:
             self.load_model()
             
         full_transcription = ""
         
         for segment_path, idx in segment_files:
-            logger.info(f"Segment işleniyor {idx+1}/{len(segment_files)}...")
+            logger.info(f"Processing segment {idx+1}/{len(segment_files)}...")
             
             if self.device == "cuda":
                 torch.cuda.empty_cache()
@@ -55,19 +55,19 @@ class Transcriber:
                 )["text"]
                 
                 full_transcription += transcription + " "
-                logger.info(f"Segment {idx+1} transkripsiyon tamamlandı. Uzunluk: {len(transcription)} karakter")
+                logger.info(f"Segment {idx+1} transcription complete. Length: {len(transcription)} characters")
             except Exception as e:
-                logger.error(f"Segment {idx+1} transkripsiyon hatası: {e}")
+                logger.error(f"Segment {idx+1} transcription error: {e}")
                 continue
         
         if not full_transcription.strip():
-            logger.error("Transkripsiyon boş! Ses dosyası işlenemedi veya içerik algılanamadı.")
-            return "Transkripsiyon işlemi başarısız oldu. Lütfen ses dosyasını kontrol edin."
+            logger.error("Transcription empty! Audio file could not be processed or content could not be detected.")
+            return "Transcription process failed. Please check the audio file."
         
         return full_transcription
     
     def cleanup(self) -> None:
-        """Model belleğini temizler."""
+        """Cleans up model memory."""
         del self.model
         self.model = None
         

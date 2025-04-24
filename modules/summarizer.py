@@ -20,7 +20,7 @@ class Summarizer:
     @staticmethod
     def detect_language(text: str) -> str:
         lang_markers = {
-            'tr': ['ve', 'bu', 'bir', 'için', 'ile', 'olarak', 'çok', 'daha', 'ama', 'gibi'],
+            'zh': ['這個', '和', '是', '的', '對於', '一個', '在', '那個', '他', '你'],
             'en': ['the', 'and', 'is', 'of', 'to', 'a', 'in', 'that', 'it', 'you'],
         }
         
@@ -36,7 +36,7 @@ class Summarizer:
             logger.info(f"Tespit edilen dil: {max_lang[0]} (skor: {max_lang[1]})")
             return max_lang[0]
         
-        return 'tr'
+        return 'en'
 
     @staticmethod
     def run_ollama_command(prompt: str, model: str, timeout: int = 300) -> str:

@@ -17,7 +17,7 @@ setup_logging()
 logger = logging.getLogger(__name__)
 
 if 'language' not in st.session_state:
-    st.session_state.language = "tr"
+    st.session_state.language = "zh"
 
 def get_lang_text(key):
     return get_text(st.session_state.language, key)
@@ -120,8 +120,8 @@ with st.sidebar:
     st.markdown("<div style='text-align: center;'><img src='https://img.icons8.com/?size=100&id=1RueIplXPGd2&format=png&color=000000' width='100'></div>", unsafe_allow_html=True)
     
     lang_options = {
-        "tr": "Türkçe", 
-        "en": "English"
+        "en": "English",
+        "zh": "中文"
     }
     
     selected_lang = st.selectbox(

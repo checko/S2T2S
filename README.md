@@ -1,3 +1,4 @@
+## I have modified the UI language to Chinese.
 # Sound-Text Conversion and Summary System
 
 🐍 Python | 🤖 Whisper | 🦙 Ollama | 🎵 Audio Processing | 🐳 Docker

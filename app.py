@@ -114,7 +114,7 @@ if 'summary_file' not in st.session_state:
 def stop_processing():
     st.session_state.stop_requested = True
     st.session_state.process_running = False
-    logger.info("İşlemi durdurma isteği alındı")
+    logger.info("Stop request received")
 
 with st.sidebar:
     st.markdown("<div style='text-align: center;'><img src='https://img.icons8.com/?size=100&id=1RueIplXPGd2&format=png&color=000000' width='100'></div>", unsafe_allow_html=True)
@@ -152,7 +152,7 @@ with st.sidebar:
         """
         st.markdown(file_details, unsafe_allow_html=True)
     
-    # Özet seçenekleri bölümünü ekle
+    # Add summary options section
     st.markdown("<div class='section-divider'></div>", unsafe_allow_html=True)
     st.subheader(get_lang_text("summary_options"))
     
@@ -164,7 +164,7 @@ with st.sidebar:
         help=get_lang_text("summary_mode_help")
     )
     
-    # Gelişmiş mod seçilirse bilgi mesajı göster
+    # Show info message if enhanced mode is selected
     if summary_mode == "enhanced":
         st.info(get_lang_text("enhanced_mode_info"))
     
@@ -306,7 +306,7 @@ if uploaded_file and st.session_state.process_running and not st.session_state.p
                     raise Exception(get_lang_text("process_stopped"))
                     
                 error_msg = str(e)
-                logger.error(f"Özet oluşturma hatası: {error_msg}", exc_info=True)
+                logger.error(f"Summary creation error: {error_msg}", exc_info=True)
                 
                 status_text.markdown(f"**{get_lang_text('fallback_model')}**")
                 
@@ -332,7 +332,7 @@ if uploaded_file and st.session_state.process_running and not st.session_state.p
                         summary = quick_summary
                         status_text.markdown(f"**{get_lang_text('simple_summary')}**")
                 except Exception as e:
-                    logger.error(f"Kapsamlı özet hatası: {e}")
+                    logger.error(f"Comprehensive summary error: {e}")
                     summary = f"{get_lang_text('summary_error')} " + str(e)
                     status_text.markdown(f"**{get_lang_text('summary_error')}**")
                 
@@ -372,7 +372,7 @@ if uploaded_file and st.session_state.process_running and not st.session_state.p
             else:
                 st.error(get_lang_text("process_error").format(e))
                 status.update(label=get_lang_text("process_failed"), state="error")
-                logger.error(f"İşlem hatası: {e}", exc_info=True)
+                logger.error(f"Process error: {e}", exc_info=True)
             
             st.session_state.process_running = False
     

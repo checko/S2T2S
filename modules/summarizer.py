@@ -22,6 +22,7 @@ class Summarizer:
         lang_markers = {
             'tr': ['ve', 'bu', 'bir', 'için', 'ile', 'olarak', 'çok', 'daha', 'ama', 'gibi'],
             'en': ['the', 'and', 'is', 'of', 'to', 'a', 'in', 'that', 'it', 'you'],
+            'zh': ['的', '是', '在', '了', '和', '有', '我', '这', '他', '你']
         }
         
         words = text.lower().split()
@@ -100,7 +101,7 @@ class Summarizer:
             
             return True
         except Exception as e:
-            logger.error(f"Ollama servis kontrolü hatası: {e}")
+            logger.error(f"Olla servis kontrolü hatası: {e}")
             return False
     
     @staticmethod
@@ -251,7 +252,7 @@ Lütfen aşağıdaki yapıyı takip eden, çok detaylı ve derinlemesine bir öz
 
 4. TEKNİK DETAYLAR - Metinde belirtilen tüm teknik özellikler, veriler, sayısal değerler ve spesifikasyonları listele ve açıkla. Verilen tüm istatistikleri, ölçümleri veya sayısal verileri dahil et.
 
-5. KARŞILAŞTIRMALAR VE KARŞITLIKLAR - Metinde yapılan tüm karşılaştırmaları veya zıtlıkları belirle ve detaylandır. Farklı fikirler, yaklaşımlar veya metodolojiler arasındaki benzerlikler ve farklılıklar nelerdir?
+5. KARŞILAŞIMALAR VE KARŞITLIKLAR - Metinde yapılan tüm karşılaştırmaları veya zıtlıkları belirle ve detaylandır. Farklı fikirler, yaklaşımlar veya metodolojiler arasındaki benzerlikler ve farklılıklar nelerdir?
 
 6. PRATİK UYGULAMALAR - Metinde bahsedilen pratik uygulamalar, örnekler veya vaka çalışmalarını detaylı olarak açıkla. Bu bilginin gerçek dünya uygulamaları nelerdir?
 

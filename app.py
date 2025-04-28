@@ -121,7 +121,8 @@ with st.sidebar:
     
     lang_options = {
         "tr": "Türkçe", 
-        "en": "English"
+        "en": "English",
+        "zh": "中文"
     }
     
     selected_lang = st.selectbox(

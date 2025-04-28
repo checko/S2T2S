@@ -1,0 +1,36 @@
+# Python generated files
+__pycache__/
+*/__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Data directory
+data/
+
+# Virtual environment
+venv/
+env/
+.env/
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Local development settings
+.env
+.env.local
+
+# System files
+.DS_Store
+Thumbs.db

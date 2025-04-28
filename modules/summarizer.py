@@ -5,6 +5,7 @@ import time
 import json
 from typing import List, Dict, Tuple, Optional
 from config import SUMMARY_CHUNK_SIZE, SUMMARY_MODEL_PRIMARY, SUMMARY_MODEL_FALLBACK, SUMMARY_TIMEOUT_BASIC,SUMMARY_TIMEOUT_ENHANCED, SUMMARY_FALLBACK_TIMEOUT
+import streamlit as st
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +38,7 @@ class Summarizer:
             logger.info(f"Tespit edilen dil: {max_lang[0]} (skor: {max_lang[1]})")
             return max_lang[0]
         
-        return 'tr'
+        return 'zh'
 
     @staticmethod
     def run_ollama_command(prompt: str, model: str, timeout: int = 300) -> str:
@@ -125,8 +126,12 @@ class Summarizer:
         if len(text) > 10000:
             text = text[:10000]
         
-        lang = Summarizer.detect_language(text)
-        
+        # Fallback to language detection if session state is not available
+        try:
+            lang = st.session_state.language
+        except:
+            lang = Summarizer.detect_language(text)
+            
         if (lang == 'tr'):
             prompt = f"""Aşağıdaki metni kapsamlı bir şekilde özetle:
 
@@ -147,6 +152,27 @@ Lütfen şu yapıda bir özet oluştur:
 Özetin sonunda "ÖNEMLİ KAVRAMLAR VE İLİŞKİLİ TERİMLER" başlığı altında metinde geçen tüm önemli kavramları ve terimleri listele.
 
 NOT: Bu bir ders veya seminer transkripsiyonu olabilir, bu yüzden TÜM içeriği dikkate al ve kapsamlı bir özet oluştur.
+"""
+        elif (lang == 'zh'):
+            prompt = f"""请全面总结以下文本：
+
+{text}
+
+请按照以下结构创建摘要：
+
+1. 概述 - 详细解释文本的主题、背景和内容（2-3段）。这部分应该很好地代表整个文本，不能太短，但也不要太长。
+
+2. 主要概念 - 文本中解释的关键概念有哪些？
+
+3. 技术细节 - 重要的技术信息有哪些？
+
+4. 关系和联系 - 概念之间的关系是什么？
+
+5. 结论和启示 - 从文本中可以得出哪些结论？
+
+在摘要的最后，在"关键概念和相关术语"标题下，请列出文本中提到的所有重要概念和术语。
+
+注意：这可能是一个课程或研讨会的记录，因此请考虑所有内容并创建一个全面的摘要。
 """
         else:
             prompt = f"""Please comprehensively summarize the following text:
@@ -445,6 +471,15 @@ Expand and enrich this section using the relevant text above. Add deeper analysi
     Metindeki alana özgü tüm terim ve kavramları kapsamlı şekilde listele. Temel kavramların yanı sıra, ilişkili veya türetilmiş kavramları da dahil et.
 
     SADECE Türkçe terim listesi ver. Her terimi açıklama. Sadece virgülle ayrılmış kavramlar listesi döndür."""
+        elif lang == 'zh':
+            prompt = f"""从以下文本中提取所有重要概念、技术术语和关键词：
+
+
+    {sample_text}
+
+    全面列出文本中的所有领域特定术语和概念。除了基本概念外，还要包含相关的或衍生的概念。
+
+    仅提供术语列表。不要解释每个术语。只需返回一个以逗号分隔的概念列表."""
         else:
             # Mevcut İngilizce prompt korunabilir
             prompt = f"""Extract all important concepts, technical terms, and keywords from the following text:
@@ -483,6 +518,19 @@ Expand and enrich this section using the relevant text above. Add deeper analysi
     Kavramlar arasındaki hiyerarşileri, bağlantıları ve ilişkileri belirt.
 
     ÖNEMLİ: Tüm yanıtını TÜRKÇE olarak ver. Hiçbir açıklama, tanım veya ilişkiyi İngilizce yazma."""
+        elif lang == 'zh':
+            prompt = f"""请分析以下概念之间的关系：
+
+    {concepts_text}
+
+    这些概念来自以下文本：
+
+    {text[:3000]}
+
+    请为每个概念提供简短的定义，并解释它们与其他概念的关系。
+    说明概念之间的层次结构、联系和关系。
+
+    重要：请用中文提供所有回答。不要用英文写任何解释、定义或关系描述。"""
         else:
             # Mevcut İngilizce prompt korunabilir
             prompt = f"""Analyze the relationships between the following concepts:
@@ -511,6 +559,12 @@ Expand and enrich this section using the relevant text above. Add deeper analysi
 {sample}
 
 Lütfen sadece alan adını tek kelime olarak belirt."""
+        elif lang == 'zh':
+            prompt = f"""请判断以下文本属于哪个领域（技术、学术、商业、通用、科学、医疗、法律等）。
+
+{sample}
+
+请只用一个词说明领域名称。"""
         else:
             prompt = f"""Detect which domain the following text belongs to (technical, academic, business, general, scientific, medical, legal, etc.).
 
@@ -541,6 +595,16 @@ Orijinal metin:
 {text[:4000]}
 
 '{domain}' alanına özgü perspektifler, terminoloji ve kavramsal çerçeveler ekle. Bu alana özgü önemli unsurları vurgula ve özete entegre et."""
+        elif lang == 'zh':
+            prompt = f"""请使用'{domain}'领域的详细分析来丰富以下摘要：
+
+{summary}
+
+原文：
+
+{text[:4000]}
+
+请添加'{domain}'领域特有的视角、术语和概念框架。突出并整合该领域的重要元素到摘要中。"""
         else:
             prompt = f"""Enrich the following summary with more detailed analyses specific to the '{domain}' domain:
 
@@ -632,6 +696,22 @@ Kriteler:
 4. Tutarlılık (özet içinde tutarlılık ve bağlantıların kalitesi)
 
 Sadece sayısal puanları virgülle ayrılmış olarak döndür: kapsam,detay,denge,tutarlılık"""
+        elif lang == 'zh':
+            prompt = f"""请评估以下摘要，并为每个标准给出0到1之间的分数：
+
+摘要：
+{summary[:2000]}
+
+原文：
+{sample_text}
+
+评估标准：
+1. 覆盖范围（摘要包含原文重要信息的程度）
+2. 详细程度（重要信息的详细说明程度）
+3. 章节平衡（不同章节内容的平衡性）
+4. 连贯性（摘要内部的连贯性和关联质量）
+
+请只返回用逗号分隔的数值分数：覆盖范围,详细程度,平衡性,连贯性"""
         else:
             prompt = f"""Evaluate the following summary and provide a score between 0 and 1 for each criterion:
 
@@ -704,6 +784,17 @@ Orijinal metin:
 {text[:5000]}
 
 Özette eksik olan en az 3 önemli noktayı veya konuyu belirle."""
+        if quality_scores["coverage"] < 0.7:
+            if lang == 'zh':
+                prompt = f"""请检测摘要中缺失的重要信息：
+
+摘要：
+{summary}
+
+原文：
+{text[:5000]}
+
+请至少找出3个在摘要中遗漏的重要观点或主题。"""
             else:
                 prompt = f"""Identify missing important information in the summary:
 
@@ -722,6 +813,11 @@ Identify at least 3 important points or topics that are missing in the summary."
                     if lang == 'tr':
                         sections.append({
                             "title": "EK ÖNEMLİ BİLGİLER",
+                            "content": missing_info
+                        })
+                    elif lang == 'zh':
+                        sections.append({
+                            "title": "补充重要信息",
                             "content": missing_info
                         })
                     else:
@@ -796,12 +892,21 @@ Identify at least 3 important points or topics that are missing in the summary."
                         concept_relationships = "Bu kavramlara ilişkin analiz yapılamadı. Lütfen tekrar deneyiniz."
                     
                     final_summary += "\n\nKAVRAM İLİŞKİLERİ VE TANIMLAR:\n" + concept_relationships
+                if lang == 'zh':
+                    # 如果输出包含英文内容则进行清理
+                    if "after analyzing" in concept_relationships.lower() or "here is" in concept_relationships.lower():
+                        # 清理英文内容并添加中文消息
+                        concept_relationships = "无法分析这些概念之间的关系。请重试。"
+                    
+                    final_summary += "\n\n概念关系和定义：\n" + concept_relationships
                 else:
                     final_summary += "\n\nCONCEPT RELATIONSHIPS AND DEFINITIONS:\n" + concept_relationships
             
-            if "ÖNEMLİ KAVRAMLAR" not in final_summary and "KEY CONCEPTS" not in final_summary and concepts:
+            if "ÖNEMLİ KAVRAMLAR" not in final_summary and "KEY CONCEPTS" not in final_summary and "概念关系" not in final_summary and concepts:
                 if lang == 'tr':
                     concepts_header = "\n\nÖNEMLİ KAVRAMLAR VE İLİŞKİLİ TERİMLER:\n"
+                elif lang == 'zh':
+                    concepts_header = "\n\n重要概念和相关术语：\n"
                 else:
                     concepts_header = "\n\nKEY CONCEPTS AND RELATED TERMS:\n"
                 
@@ -835,6 +940,12 @@ Identify at least 3 important points or topics that are missing in the summary."
 {text}
 
 Temel fikri, ana noktaları ve önemli kavramları kapsayan özlü bir özet oluştur."""
+        elif lang == 'zh':
+            prompt = f"""请快速总结以下文本：
+
+{text}
+
+请创建一个简明的摘要，涵盖基本思想、主要观点和重要概念。"""
         else:
             prompt = f"""Quickly summarize the following text:
 
@@ -859,6 +970,8 @@ Create a concise summary covering the main idea, key points, and important conce
         if quick_summary:
             if lang == 'tr':
                 context = f"Aşağıda metnin bir hızlı özeti verilmiştir:\n\n{quick_summary}\n\nBu özeti daha kapsamlı hale getir."
+            elif lang == 'zh':
+                context = f"下面是文本的快速摘要：\n\n{quick_summary}\n\n请将此摘要扩展得更全面。"
             else:
                 context = f"A quick summary of the text is provided below:\n\n{quick_summary}\n\nMake this summary more comprehensive."
         
@@ -878,6 +991,22 @@ Lütfen şu yapıda bir özet oluştur:
 6. ÖNEMLİ TERİMLER - Metinde geçen önemli kavramlar
 
 Detaylı, kapsamlı ve içeriği tam yansıtan bir özet olsun."""
+        elif lang == 'zh':
+            prompt = f"""请全面总结以下文本：
+
+{text[:7000]}
+
+{context}
+
+请按照以下结构创建摘要：
+1. 概述 - 文本的主要内容
+2. 主题和概念 - 文本中的基本思想
+3. 重点内容 - 文本的主要观点
+4. 技术细节 - 如有技术信息
+5. 结论和启示 - 可以得出的结论
+6. 重要术语 - 文本中出现的重要概念
+
+请创建一个详细、全面且准确反映内容的摘要。"""
         else:
             prompt = f"""Comprehensively summarize the following text:
 
@@ -928,13 +1057,15 @@ Make it detailed, comprehensive, and fully reflective of the content."""
             summary = Summarizer.create_basic_summary(transcription, timeout=timeout)
             
             # Önemli kavramlar ekleme kodu aynı kalabilir
-            if "ÖNEMLİ KAVRAMLAR" not in summary and "KEY CONCEPTS" not in summary:
+            if "ÖNEMLİ KAVRAMLAR" not in summary and "KEY CONCEPTS" not in summary and "概念关系" not in summary:
                 try:
                     lang = Summarizer.detect_language(transcription)
                     concepts = Summarizer.extract_key_concepts(transcription, lang)
                     
                     if lang == 'tr':
                         concepts_header = "\n\nÖNEMLİ KAVRAMLAR VE İLİŞKİLİ TERİMLER:\n"
+                    elif lang == 'zh':
+                        concepts_header = "\n\n重要概念和相关术语：\n"
                     else:
                         concepts_header = "\n\nKEY CONCEPTS AND RELATED TERMS:\n"
                     

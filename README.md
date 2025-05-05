@@ -1,3 +1,4 @@
+# Add Chinese language support
 # Sound-Text Conversion and Summary System
 
 🐍 Python | 🤖 Whisper | 🦙 Ollama | 🎵 Audio Processing | 🐳 Docker
